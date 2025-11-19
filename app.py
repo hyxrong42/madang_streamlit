@@ -1,21 +1,32 @@
 import streamlit as st
 import pandas as pd
 import duckdb
+from pathlib import Path
 
-# CSV 읽기 (DuckDB에 테이블처럼 불러오기)
-con = duckdb.connect(database=':memory:')
 
-con.execute("""
-    CREATE TABLE Book AS SELECT * FROM read_csv_auto('Book_madang.csv');
-""")
-con.execute("""
-    CREATE TABLE Customer AS SELECT * FROM read_csv_auto('Customer_madang.csv');
-""")
-con.execute("""
-    CREATE TABLE Orders AS SELECT * FROM read_csv_auto('Orders_madang.csv');
-""")
+@st.cache_resource
+def get_connection():
+    base_path = Path(__file__).parent
+    con = duckdb.connect(database=':memory:')
 
-# Streamlit 화면 구성
+    con.execute(
+        "CREATE TABLE Book AS SELECT * FROM read_csv_auto(?);",
+        [str(base_path / "Book_madang.csv")]
+    )
+    con.execute(
+        "CREATE TABLE Customer AS SELECT * FROM read_csv_auto(?);",
+        [str(base_path / "Customer_madang.csv")]
+    )
+    con.execute(
+        "CREATE TABLE Orders AS SELECT * FROM read_csv_auto(?);",
+        [str(base_path / "Orders_madang.csv")]
+    )
+    return con
+
+# 🔹 Cloud와 Streamlit에서 DB 연결 유지
+con = get_connection()
+
+# 🔹 Streamlit 화면 구성
 st.title("📚 마당 서점 대시보드")
 
 menu = st.sidebar.selectbox(
