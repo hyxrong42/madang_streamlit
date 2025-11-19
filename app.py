@@ -83,7 +83,10 @@ elif menu == "고객 이름 검색":
     name = st.text_input("고객 이름 입력")
 
     if name:
-        query = """
+        # 작은따옴표 들어가면 SQL 깨지는 걸 막기 위한 이스케이프
+        safe_name = name.replace("'", "''")
+
+        query = f"""
             SELECT 
                 c.name,
                 b.bookname,
@@ -92,9 +95,11 @@ elif menu == "고객 이름 검색":
             FROM Orders o
             JOIN Customer c ON o.custid = c.custid
             JOIN Book b ON o.bookid = b.bookid
-            WHERE lower(c.name) LIKE '%' || lower(?) || '%'
+            WHERE lower(c.name) LIKE '%' || lower('{safe_name}') || '%'
             ORDER BY o.orderdate;
         """
-        df = con.execute(query, [name]).df()
+
+        df = con.execute(query).df()
         st.dataframe(df, use_container_width=True)
+
 
