@@ -57,34 +57,7 @@ if menu == "테이블 보기":
     st.dataframe(con.execute("SELECT * FROM Customer").df(), use_container_width=True)
 
 # ---------------------- 고객별 총 매출 ----------------------
-elif menu == "고객별 총 매출":
-    st.subheader("고객별 총 매출 TOP 10")
-    df = con.execute("""
-        SELECT c.name, SUM(o.saleprice) AS total_sales
-        FROM Orders o
-        JOIN Customer c ON o.custid = c.custid
-        GROUP BY c.name
-        ORDER BY total_sales DESC
-        LIMIT 10
-    """).df()
-    st.dataframe(df, use_container_width=True)
-    if not df.empty:
-        st.bar_chart(df.set_index("name")["total_sales"])
 
-# ---------------------- 도서별 총 매출 ----------------------
-elif menu == "도서별 총 매출":
-    st.subheader("도서별 총 매출 TOP 10")
-    df = con.execute("""
-        SELECT b.bookname, SUM(o.saleprice) AS total_sales
-        FROM Orders o
-        JOIN Book b ON o.bookid = b.bookid
-        GROUP BY b.bookname
-        ORDER BY total_sales DESC
-        LIMIT 10
-    """).df()
-    st.dataframe(df, use_container_width=True)
-    if not df.empty:
-        st.bar_chart(df.set_index("bookname")["total_sales"])
 
 # ---------------------- 고객 이름 검색 + 거래 입력 (탭) ----------------------
 elif menu == "고객 이름 검색":
