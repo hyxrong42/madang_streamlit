@@ -3,7 +3,6 @@ import pandas as pd
 import duckdb
 from pathlib import Path
 
-
 @st.cache_resource
 def get_connection():
     base_path = Path(__file__).parent
@@ -23,10 +22,10 @@ def get_connection():
     )
     return con
 
-# 🔹 Cloud와 Streamlit에서 DB 연결 유지
+
 con = get_connection()
 
-# 🔹 Streamlit 화면 구성
+
 st.title("📚 마당 서점 대시보드")
 
 menu = st.sidebar.selectbox(
@@ -38,26 +37,6 @@ menu = st.sidebar.selectbox(
         "고객 이름 검색"
     ]
 )
-import duckdb
-import pandas as pd
-
-# 메모리 DB / 또는 file.duckdb로 저장 가능
-con = duckdb.connect(database=':memory:')
-
-# 📌 CSV 불러와서 테이블 생성
-con.execute("""
-    CREATE TABLE Customer AS SELECT * FROM read_csv_auto('Customer_madang.csv');
-""")
-
-# 📌 네 정보 INSERT (Python에서는 문자열로 넣어야 함)
-con.execute("""
-    INSERT INTO Customer (custid, name, address, phone)
-    VALUES (6, '정혜령', '대한민국 인천', '010-2873-1807')
-""")
-
-# 📌 확인
-df = con.execute("SELECT * FROM Customer").df()
-print(df)
 
 if menu == "테이블 보기":
     st.subheader("Customer 테이블")
@@ -94,9 +73,7 @@ elif menu == "고객 이름 검색":
     name = st.text_input("고객 이름 입력")
 
     if name:
-        # 작은따옴표 들어가면 SQL 깨지는 걸 막기 위한 이스케이프
         safe_name = name.replace("'", "''")
-
         query = f"""
             SELECT 
                 c.name,
@@ -109,8 +86,6 @@ elif menu == "고객 이름 검색":
             WHERE lower(c.name) LIKE '%' || lower('{safe_name}') || '%'
             ORDER BY o.orderdate;
         """
-
         df = con.execute(query).df()
         st.dataframe(df, use_container_width=True)
-
 
